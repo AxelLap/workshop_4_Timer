@@ -1,61 +1,33 @@
-import React, { createContext, useContext, useState } from "react";
+// useTimerStore.js
+"use client";
+import { create } from "zustand";
 
-const TimerContext = createContext();
+const useTimerStore = create((set) => ({
+  timers: [],
 
-export const useTimerContext = () => useContext(TimerContext);
-
-export const TimerProvider = ({ children }) => {
-  const [timers, setTimers] = useState([]);
-
-  const addTimer = (timer) => {
-    const endAt = Date.now() + timer.duration;
-    setTimers((prev) => [
-      ...prev,
-      { ...timer, timeLeft: timer.duration, endAt },
-    ]);
-  };
-
-  const startTimer = (index) => {
-    setTimers((prev) => {
-      const newTimers = [...prev];
-      const timer = {
-        ...newTimers[index],
+  addTimer: (ms) =>
+    set((state) => {
+      const newTimer = {
+        id: Date.now(),
+        duration: ms,
+        timeLeft: ms,
+        endAt: Date.now() + ms,
         isRunning: true,
-        endAt: Date.now() + newTimers[index].timeLeft,
       };
-      newTimers[index] = timer;
-      return newTimers;
-    });
-  };
+      return { timers: [...state.timers, newTimer] };
+    }),
 
-  const stopTimer = (index) => {
-    setTimers((prev) => {
-      const newTimers = [...prev];
-      const timer = {
-        ...newTimers[index],
-        isRunning: false,
-        timeLeft: newTimers[index].endAt - Date.now(),
-      };
-      newTimers[index] = timer;
-      return newTimers;
-    });
-  };
+  removeTimer: (timerId) =>
+    set((state) => ({
+      timers: state.timers.filter((timer) => timer.id !== timerId),
+    })),
 
-  const removeTimer = (index) => {
-    setTimers((prev) => prev.filter((_, i) => i !== index));
-  };
+  toggleIsRunning: (timerId) =>
+    set((state) => ({
+      timers: state.timers.map((timer) =>
+        timer.id === timerId ? { ...timer, isRunning: !timer.isRunning } : timer
+      ),
+    })),
+}));
 
-  return (
-    <TimerContext.Provider
-      value={{
-        timers,
-        addTimer,
-        startTimer,
-        stopTimer,
-        removeTimer,
-      }}
-    >
-      {children}
-    </TimerContext.Provider>
-  );
-};
+export default useTimerStore;

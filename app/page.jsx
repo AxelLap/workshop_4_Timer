@@ -1,39 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { useTimerContext, TimerProvider } from "./useTimerStore";
-import { TimerList } from "./TimerList";
+import useTimerStore from "./useTimerStore"; // Importer le store Zustand
+import Timer from "./Timer";
 
-const Home = () => {
-  const { addTimer } = useTimerContext();
-  const [time, setTime] = useState({
-    hours: "00",
-    minutes: "01",
-    seconds: "00",
-    name: "Timer",
-  });
+export default function Home() {
+  const [time, setTime] = useState({ hrs: "00", mins: "01", secs: "00" });
+  const timers = useTimerStore((state) => state.timers); // Récupérer les timers depuis le store
+  const addTimer = useTimerStore((state) => state.addTimer); // Récupérer la fonction addTimer
 
-  const formatTimeValue = (value, max) => {
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue < 0) return 0;
-    return Math.min(numValue, max);
+  const handleAddTimer = () => {
+    const ms =
+      parseInt(time.hrs, 10) * 3600000 +
+      parseInt(time.mins, 10) * 60000 +
+      parseInt(time.secs, 10) * 1000;
+
+    if (ms < 10000) {
+      alert("Timer must be at least 10 seconds");
+      return;
+    }
+
+    addTimer(ms); // Appeler la fonction addTimer du store Zustand
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setTime((prevTime) => ({
-      ...prevTime,
-      [name]: formatTimeValue(value, name === "hours" ? 23 : 59),
-    }));
-  };
-
-  const handleAddTimer = () => {
-    const ms =
-      parseInt(time.hours, 10) * 3600000 +
-      parseInt(time.minutes, 10) * 60000 +
-      parseInt(time.seconds, 10) * 1000;
-
-    addTimer({ id: Date.now(), duration: ms, isRunning: true });
+    const formattedValue = Math.min(value, name === "hrs" ? 23 : 59);
+    setTime((prevTime) => ({ ...prevTime, [name]: formattedValue }));
   };
 
   return (
@@ -50,22 +43,22 @@ const Home = () => {
         <div className="flex items-center rounded-md border border-neutral bg-base-200 p-2">
           <input
             className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
-            name="hours"
-            value={time.hours}
+            name="hrs"
+            value={time.hrs}
             onChange={handleInputChange}
           />
           <p className="text-lg">:</p>
           <input
             className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
-            name="minutes"
-            value={time.minutes}
+            name="mins"
+            value={time.mins}
             onChange={handleInputChange}
           />
           <p className="text-lg">:</p>
           <input
             className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
-            name="seconds"
-            value={time.seconds}
+            name="secs"
+            value={time.secs}
             onChange={handleInputChange}
           />
         </div>
@@ -75,17 +68,11 @@ const Home = () => {
           </button>
         </div>
       </div>
-      <TimerList />
+      <ul className="grid grid-cols-1 gap-4">
+        {timers.map((timer) => (
+          <Timer key={timer.id} timerId={timer.id} />
+        ))}
+      </ul>
     </main>
   );
-};
-
-const App = () => {
-  return (
-    <TimerProvider>
-      <Home />
-    </TimerProvider>
-  );
-};
-
-export default App;
+}
