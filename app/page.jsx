@@ -3,6 +3,7 @@
 import { useState } from "react";
 import useTimerStore from "./useTimerStore"; // Importer le store Zustand
 import Timer from "./Timer";
+import useTimerInterval from "./useTimerInterval";
 
 export default function Home() {
   const [time, setTime] = useState({ hrs: "00", mins: "01", secs: "00" });
@@ -28,6 +29,8 @@ export default function Home() {
     const formattedValue = Math.min(value, name === "hrs" ? 23 : 59);
     setTime((prevTime) => ({ ...prevTime, [name]: formattedValue }));
   };
+
+  useTimerInterval();
 
   return (
     <main className="flex min-h-full flex-col items-center justify-between p-24">

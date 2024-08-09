@@ -1,7 +1,10 @@
-import { X, Play, Pause, Bell, Circle } from "lucide-react";
+"use client";
 
+import React from "react";
+import { X, Play, Pause, Bell, Circle, RotateCcw } from "lucide-react";
 import useTimerStore from "./useTimerStore";
 
+// Fonction pour obtenir le texte du timer
 const getTimerText = (time) => {
   const totalSeconds = Math.floor(time / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -23,18 +26,20 @@ const getTimerText = (time) => {
   return timeText;
 };
 
+// Fonction pour obtenir le texte de l'heure de fin
 const getEndAtText = (time) => {
   const endAtDate = new Date(time);
-  const endAtText = endAtDate.toLocaleTimeString();
-  return endAtText;
+  return endAtDate.toLocaleTimeString();
 };
 
 const Timer = ({ timerId }) => {
-  const timer = useTimerStore((s) => s.timers.find((t) => t?.id === timerId));
+  const timer = useTimerStore((state) =>
+    state.timers.find((t) => t.id === timerId)
+  );
 
   if (!timer) return null;
 
-  const { id, duration, timeLeft, isRunning, endAt } = timer;
+  const { id, timeLeft, isRunning, endAt } = timer;
 
   const removeTimer = useTimerStore((state) => state.removeTimer);
   const toggleIsRunning = useTimerStore((state) => state.toggleIsRunning);
@@ -76,28 +81,32 @@ const Timer = ({ timerId }) => {
             <p className="text-base-content text-2xl">{timeText}</p>
           </div>
         </div>
-        <button className="absolute bottom-3 left-3 flex size-7 items-center justify-center rounded-full bg-base-300 p-0 text-base-content">
-          <X
-            onClick={(e) => {
-              removeTimer(id);
-            }}
-          />
+        <button
+          className="absolute bottom-3 left-3 flex size-7 items-center justify-center rounded-full bg-base-300 p-0 text-base-content"
+          onClick={() => removeTimer(id)}
+        >
+          <X />
         </button>
         {isRunning ? (
-          <button className="absolute bottom-3 right-3 flex size-7 items-center justify-center rounded-full bg-warning p-0 text-warning-content">
-            <Pause
-              onClick={(e) => {
-                toggleIsRunning(id);
-              }}
-            />
+          <button
+            className="absolute bottom-3 right-3 flex size-7 items-center justify-center rounded-full bg-warning p-0 text-warning-content"
+            onClick={() => toggleIsRunning(id)}
+          >
+            <Pause />
+          </button>
+        ) : timeLeft > 0 ? (
+          <button
+            className="absolute bottom-3 right-3 flex size-7 items-center justify-center rounded-full bg-success p-0 text-success-content"
+            onClick={() => toggleIsRunning(id)}
+          >
+            <Play />
           </button>
         ) : (
-          <button className="absolute bottom-3 right-3 flex size-7 items-center justify-center rounded-full bg-success p-0 text-success-content">
-            <Play
-              onClick={(e) => {
-                toggleIsRunning(id);
-              }}
-            />
+          <button
+            className="absolute bottom-3 right-3 flex size-7 items-center justify-center rounded-full bg-danger p-0 text-danger-content"
+            onClick={() => toggleIsRunning(id)}
+          >
+            <RotateCcw />
           </button>
         )}
       </div>
