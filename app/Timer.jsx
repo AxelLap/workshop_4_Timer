@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { X, Play, Pause, Bell, Circle, RotateCcw } from "lucide-react";
 import useTimerStore from "./useTimerStore";
 
